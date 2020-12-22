@@ -24,7 +24,7 @@ export default function App() {
   async function handleLikeRepository(id) {
 
     // Implement "Like Repository" functionality
-    const response = await api.post(`/repositories/${id}/like`)
+    const response = await api.post(`/repositories/${id}/like`);
 
     // Get liked project
     const likedRepository = response.data;    
