@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from "react";
+import React, {useState, useEffect} from "react";
 
 import {
   SafeAreaView,
@@ -24,24 +24,21 @@ export default function App() {
   async function handleLikeRepository(id) {
 
     // Implement "Like Repository" functionality
-    await api.post(`/repositories/${id}/like`)
-
-    // Create new list of projects
-    let localProjects = projects.map(project => {
-      return Object.assign({}, project)
-    });   
-
-    // Get repository index in projects list
-    const likedProjectIndex = localProjects.findIndex(project => {return project.id === id});
+    const response = await api.post(`/repositories/${id}/like`)
 
     // Get liked project
-    let likedProject = localProjects[likedProjectIndex]; 
-
-    // Add one to the number of likes
-    likedProject.likes += 1;     
+    const likedRepository = response.data;    
     
+    const projectsUpdated = projects.map(project => {
+      if(project.id === id){
+        return likedRepository;
+      } else {
+        return repository;
+      }
+    });
+
     // Update projects locally
-    setProjects(localProjects)
+    setProjects(projectsUpdated)
      
   }
 
