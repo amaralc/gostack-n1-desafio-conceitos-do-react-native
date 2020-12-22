@@ -14,20 +14,35 @@ import api from './services/api';
 
 export default function App() {
   const [projects, setProjects] = useState([]);
-  const [likedAt, setLikedAt] = useState('')
 
   useEffect(() => {
     api.get('/repositories').then((response) => {
       setProjects(response.data);
-      console.log(response.data)
     });   
-  }, [likedAt]);
+  }, [projects]);
 
   async function handleLikeRepository(id) {
+
     // Implement "Like Repository" functionality
-    await api.post(`/repositories/${id}/like`).then((response)=>{
-      setLikedAt(new Date().toString())
-    }); 
+    await api.post(`/repositories/${id}/like`)
+
+    // Create new list of projects
+    let localProjects = projects.map(project => {
+      return Object.assign({}, project)
+    });   
+
+    // Get repository index in projects list
+    const likedProjectIndex = localProjects.findIndex(project => {return project.id === id});
+
+    // Get liked project
+    let likedProject = localProjects[likedProjectIndex]; 
+
+    // Add one to the number of likes
+    likedProject.likes += 1;     
+    
+    // Update projects locally
+    setProjects(localProjects)
+     
   }
 
   return (
@@ -57,7 +72,7 @@ export default function App() {
                   // Remember to replace "1" below with repository ID: {`repository-likes-${repository.id}`}
                   testID={`repository-likes-${project.id}`}
                 >
-                  {project.likes} curtidas
+                  {project.likes} curtida{project.likes > 1 && 's'}
                 </Text>
               </View>
 
