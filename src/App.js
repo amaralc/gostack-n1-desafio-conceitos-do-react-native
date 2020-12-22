@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useCallback} from "react";
 
 import {
   SafeAreaView,
@@ -14,29 +14,35 @@ import api from './services/api';
 
 export default function App() {
   const [projects, setProjects] = useState([]);
+  const [likedAt, setLikedAt] = useState('')
 
   useEffect(() => {
     api.get('/repositories').then((response) => {
       setProjects(response.data);
       console.log(response.data)
     });   
-  }, []);
+  }, [likedAt]);
 
   async function handleLikeRepository(id) {
     // Implement "Like Repository" functionality
+    await api.post(`/repositories/${id}/like`).then((response)=>{
+      setLikedAt(new Date().toString())
+    }); 
   }
 
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor="#7159c1" />
       <SafeAreaView style={styles.container}>
-        {projects.map(project => {
-          return(
+      <FlatList
+          data={projects}
+          keyExtractor={(project) => project.id}
+          renderItem={({item: project}) => (
             <View style={styles.repositoryContainer} key={project.id}>
               <Text style={styles.repository}>{project.title}</Text>
 
               <View style={styles.techsContainer}>
-              {project.techs.map(tech => {
+              {project.techs && project.techs.map(tech => {
                   return(
                     <Text style={styles.tech} key={tech}>
                       {tech}
@@ -57,17 +63,15 @@ export default function App() {
 
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => handleLikeRepository(1)}
+                onPress={() => handleLikeRepository(project.id)}
                 // Remember to replace "1" below with repository ID: {`like-button-${repository.id}`}
-                testID={`like-button-1`}
+                testID={`like-button-${project.id}`}
               >
                 <Text style={styles.buttonText}>Curtir</Text>
               </TouchableOpacity>
             </View>
-          )
-        })}
-        
-        
+          )}
+        />        
       </SafeAreaView>
     </>
   );
